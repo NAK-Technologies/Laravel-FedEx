@@ -28,7 +28,7 @@ class FedEx
         if ($testing) {
             $this->url = 'https://apis-sandbox.fedex.com/';
         } else {
-            $this->url = 'https://apis.fedex.com/oauth/token';
+            $this->url = 'https://apis.fedex.com/';
         }
         $this->account = config('couriers.services.fedex.account');
         $url = 'oauth/token';
