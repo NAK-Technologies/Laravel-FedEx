@@ -10,11 +10,13 @@ class Pickup
         'CONTACT_FEDEX_TO_SCHEDULE',
         'DROPOFF_AT_FEDEX_LOCATION'
     ];
-    public $pickup;
+    public $pickupType;
+    public $date;
 
-    public function setPickup($pickup)
+    public function setPickup($pickup, $date='')
     {
-        $this->pickup = $pickup;
+        $this->pickupType = $pickup;
+        $this->date = $date;
 
         return $this;
     }

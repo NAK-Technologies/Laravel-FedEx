@@ -12,6 +12,7 @@ trait Rates
         $packages = [];
         // dd($this->recipient->streetLines);
         foreach($this->packages as $package){
+            // dd($package);
             $packages[] = [
                             'weight' => [
                                 'units' => $package->weightUnits,
@@ -27,6 +28,7 @@ trait Rates
         }
 
         // dd($this->shipper->city);
+        // dd($packages);
         $params = [
             'accountNumber' => [
                 'value' => $this->account
@@ -48,11 +50,11 @@ trait Rates
                         'countryCode' => $this->recipient->countryCode
                     ]
                 ],
-                'serviceType' => $this->serviceType->service,
+                'serviceType' => $this->serviceType->service ?? '',
                 'preferredCurrency' => 'USD',
                 'rateRequestType' => ['PREFERRED'],
-                'shipDateStamp' => \Carbon\Carbon::parse($this->date)->format('Y-m-d'),
-                'pickupType' => $this->pickupType->pickup,
+                'shipDateStamp' => \Carbon\Carbon::parse($this->pickup->date == '' ? \Carbon\Carbon::now() : $this->pickup->date)->format('Y-m-d'),
+                'pickupType' => $this->pickup->pickupType,
                 'requestedPackageLineItems' => $packages,
                 "edtRequestType" => "ALL"
             ]
@@ -65,7 +67,7 @@ trait Rates
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer '.$this->token,
         ]]);
-        $res = collect(json_decode($response->getBody()->getContents()))['output']->rateReplyDetails;
+        $res = collect(json_decode($response->getBody()->getContents(),true))['output']['rateReplyDetails'];
 
         // $res = array_map(function ($el) {
         //     $charges = array_map(function ($e){
@@ -74,8 +76,8 @@ trait Rates
         //     return ['serviceName' => $el->serviceName, 'charges' => $charges];
         // }, $res);
         // // dd(collect(json_decode($response->getBody()->getContents()))['output']->rateReplyDetails);
-        // dd($res[0]->ratedShipmentDetails[0]->totalNetFedExCharge);
+        // dd($res);
         // return $res;
-        return $res[0]->ratedShipmentDetails[0]->totalNetFedExCharge;
+        return $res;
     }
 }
