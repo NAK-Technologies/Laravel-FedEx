@@ -1,0 +1,32 @@
+{
+    "name": "nak-tech/couriers",
+    "description": "Currently only FedEx is supported",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "NakTech\\Couriers\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nehal Ahmed Khan",
+            "email": "nak.work.dev@gmail.com"
+        }
+    ],
+    "require": {},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "NakTech\\Couriers\\CourierServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    }
+}
