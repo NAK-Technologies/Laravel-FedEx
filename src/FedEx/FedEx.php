@@ -2,7 +2,7 @@
 
 namespace NakTech\Couriers\FedEx;
 
-use App\FedEx\traits\Rates;
+use NakTech\Couriers\FedEx\traits\Rates;
 use Illuminate\Support\Facades\Http;
 
 class FedEx
