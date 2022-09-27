@@ -1,6 +1,6 @@
 {
     "name": "nak-tech/couriers",
-    "description": "Currently only FedEx is supported",
+    "description": "Currently only FedEx (rates) is supported",
     "type": "library",
     "license": "MIT",
     "autoload": {
