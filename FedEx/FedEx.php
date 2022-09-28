@@ -11,10 +11,10 @@ class FedEx
     use Rates;
 
 
-    protected $token;
-    protected $token_type;
-    protected $scope;
-    protected $expiry;
+    protected static $token;
+    protected static $token_type;
+    protected static $scope;
+    protected static $expiry;
     protected $account;
     public $shipper;
     public $recipient;
@@ -22,38 +22,52 @@ class FedEx
     public $packages = [];
     public $serviceType;
     public $date;
+    public static $url;
 
 
     public function __construct($testing = false)
     {
-        if($testing){
-            $this->url = 'https://apis-sandbox.fedex.com/';
-        }else{
-            $this->url = 'https://apis.fedex.com/oauth/token';
-        }
         $this->account = env('FEDEX_ACCOUNT');
 
-        $response = $this->authenticate();
+        $response = self::authenticate($testing);
 
         $responseBody = json_decode($response->getBody(), true);
-            if(!Cache::store(env('CACHE_DRIVER'))->has('FedEx')){
-                $responseBody = json_decode($this->authenticate()->getBody(), true);
-                // dd($responseBody);
-                Cache::store(env('CACHE_DRIVER'))->put('FedEx', $responseBody['access_token'], $responseBody['expires_in']);
-            }
 
-            $this->token = Cache::store(env('CACHE_DRIVER'))->get('FedEx');
-            $this->token_type = $responseBody['token_type'];
-            $this->scope = $responseBody['scope'];
-            $this->expiry = $responseBody['expires_in'];
+        if(!Cache::store(env('CACHE_DRIVER'))->has('FedEx')){
+            $responseBody = json_decode(self::authenticate()->getBody(), true);
+            Cache::store(env('CACHE_DRIVER'))->put('FedEx', $responseBody['access_token'], $responseBody['expires_in']);
+        }
+
+        $this->initProperties($responseBody, $testing);
+
     }
 
-    public function authenticate()
+    public static function initProperties($responseBody)
     {
+        self::$token = Cache::store(env('CACHE_DRIVER'))->get('FedEx');
+        self::$token_type = $responseBody['token_type'];
+        self::$scope = $responseBody['scope'];
+        self::$expiry = $responseBody['expires_in'];
+    }
+
+    public static function initUrl($testing = false)
+    {
+        if($testing){
+            self::$url = 'https://apis-sandbox.fedex.com/';
+        }else{
+            self::$url = 'https://apis.fedex.com/';
+        }
+    }
+
+    public static function authenticate($testing = false)
+    {
+        if(!self::$url){
+            self::initUrl($testing);
+        }
         $url = 'oauth/token';
         $client = new \GuzzleHttp\Client();
 
-        return $client->request('POST', $this->url.$url, ['form_params' => [
+        return $client->request('POST', self::$url.$url, ['form_params' => [
             'client_id' => env('FEDEX_API_KEY'),
             'client_secret' => env('FEDEX_SECRET_KEY'),
             'grant_type' => 'client_credentials',

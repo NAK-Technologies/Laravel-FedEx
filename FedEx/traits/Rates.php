@@ -2,6 +2,9 @@
 
 namespace App\FedEx\traits;
 
+use App\FedEx\FedEx;
+use Illuminate\Support\Facades\Cache;
+use Throwable;
 
 trait Rates
 {
@@ -10,6 +13,11 @@ trait Rates
         $url = 'rate/v1/rates/quotes';
 
         $packages = [];
+        if(!Cache::store(env('CACHE_DRIVER'))->has('FedEx')){
+            // dd('hello');
+            $res = FedEx::authenticate(true);
+            FedEx::initProperties($res);
+        }
         // dd($this->recipient->streetLines);
         foreach($this->packages as $package){
             // dd($package);
@@ -61,13 +69,17 @@ trait Rates
         ];
 
         // dd(json_encode($params));
-        $client = new \GuzzleHttp\Client();
-        $response = $client->request('POST', $this->url.$url, ['json' => $params, 'headers' => [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer '.$this->token,
-        ]]);
-        $res = collect(json_decode($response->getBody()->getContents(),true))['output']['rateReplyDetails'];
+        try{
+            $client = new \GuzzleHttp\Client();
+            $response = $client->request('POST', self::$url.$url, ['json' => $params, 'headers' => [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer '.self::$token,
+            ]]);
+            $res = collect(json_decode($response->getBody()->getContents(),true))['output']['rateReplyDetails'];
+        }catch (Throwable $e){
+            return 'error';
+        }
 
         // $res = array_map(function ($el) {
         //     $charges = array_map(function ($e){
